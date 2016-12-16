@@ -34,6 +34,7 @@ dir="$(dirname "$0")"
 . $dir/functions/configure
 . $dir/functions/development
 . $dir/functions/favs
+. $dir/functions/pips
 . $dir/functions/repos
 . $dir/functions/thirdparty
 . $dir/functions/update
@@ -74,6 +75,7 @@ function main {
 		$LINES $COLUMNS $(( $LINES - 12 )) \
 		update			'Perform system update' \
 		favs			'Install favourite applications' \
+		pips			'Install python packages applications' \
 		utilities		'Install favourite system utilities' \
 		development		'Install favourite development tools' \
 		thirdparty		'Install third-party applications' \
@@ -81,7 +83,7 @@ function main {
 		configure		'Configure system' \
 		cleanup			'Cleanup the system' \
 		3>&1 1>&2 2>&3)
-	 
+
 	exitstatus=$?
 	if [ $exitstatus = 0 ]; then
 		$MAIN

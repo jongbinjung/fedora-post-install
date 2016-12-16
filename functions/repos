@@ -1,44 +1,95 @@
 #!/bin/bash
 
-#----- DECLARATIONS -----#
-
-dir="$(dirname "$0")"
-
-# THIRD PARTY REPOS
-function repos {
-echo ''
-show_info 'Which repositories would you like to enable? '
-echo ''
-echo '1. RPM Fusion?'
-echo 'r. Return'
-echo ''
-show_info 'Enter your choice:' && read REPLY
-case $REPLY in
-# RPM Fusion
-1)
-    # Check
-    if [ -e /etc/yum.repos.d/rpmfusion-free.repo ]; then
-        clear
-        echo 'RPM Fusion is already in the repositories.'
-        echo ''
-    else
-        # Add repository
-        echo 'Adding RPM Fusion to repositories...'
-        show_info 'Requires root privileges:'
-        su -c 'rpm -Uvh http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-stable.noarch.rpm http://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-stable.noarch.rpm'
-        show_success 'Done.'
-        # Update system
-        echo 'Performing system update...'
-        sudo dnf -y update
-        echo 'Done'
-    fi
-    repos
-    ;;
-# Return
-[Rr]*) 
-    clear && main;;
-# Invalid choice
-* ) 
-    clear && echo 'Not an option, try again.' && repos;;
-esac
+# Install RPM Fusion
+function rpmfusion {
+eval `resize` 
+exitstatus=$?
+if [ $exitstatus = 0 ]; then
+	status="0"
+	while [ "$status" -eq 0 ]  
+	do
+		VERSION=$(whiptail \
+		--title "RPM Fusion" --radiolist \
+		"Which RPM Fusion repositories would you like to add to your software sources?"\
+		--ok-button "Add" \
+		--cancel-button "Go Back" \
+		$LINES $COLUMNS $(( $LINES - 12 )) \
+		"free"		"RPM Fusion (Free)" ON \
+		"nonfree"	"RPM Fusion (Non-free)" OFF \
+		3>&1 1>&2 2>&3) 
+		# Change to lower case and remove spaces.
+		case "${VERSION}" in
+		free) 
+			# Check
+			if [ -e /etc/yum.repos.d/rpmfusion-free.repo ]; then
+				echo 'RPM Fusion (Free) is already in the repositories.'
+				whiptail --msgbox "RPM Fusion (Free) is already in the repositories." 8 78
+				rpmfusion
+			else
+				# Add repository
+				echo 'Adding RPM Fusion to repositories...'
+				show_info 'Requires root privileges:'
+				# Free
+				sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
+				show_success 'Done.'
+				# Update system
+				echo 'Performing system update...'
+				sudo dnf -y update
+				echo 'Done'
+				whiptail --title "Finished" --msgbox "RPM Fusion (Free) repository  has been added." 8 78
+				rpmfusion
+			fi
+		;;
+		nonfree) 
+			# Check
+			if [ -e /etc/yum.repos.d/rpmfusion-nonfree.repo ]; then
+				echo 'RPM Fusion (Non-free) is already in the repositories.'
+				whiptail --msgbox "RPM Fusion (Non-free) is already in the repositories." 8 78
+				rpmfusion
+			else
+				# Add repository
+				echo 'Adding RPM Fusion to repositories...'
+				show_info 'Requires root privileges:'
+				# Non-free
+				sudo dnf install https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+				show_success 'Done.'
+				# Update system
+				echo 'Performing system update...'
+				sudo dnf -y update
+				echo 'Done'
+				whiptail --title "Finished" --msgbox "RPM Fusion (Non-free) repository  has been added." 8 78
+				rpmfusion
+			fi
+		;;
+		*)status=1 
+			repositories
+		;;
+		esac
+		exitstatus1=$status1
+	done
+else
+	repositories
+fi
 }
+
+# Install Third-Party Repositories
+function repositories {
+	eval `resize`
+	REPOS=$(whiptail \
+		--notags \
+		--title "Third-Party Repositories" \
+		--menu "\nWhich third-party repositories would you like to add?" \
+		--ok-button "Install" \
+		--cancel-button "Go Back" \
+		$LINES $COLUMNS $(( $LINES - 12 )) \
+		'rpmfusion'		 'RPM Fusion' \
+		3>&1 1>&2 2>&3)
+	 
+	exitstatus=$?
+	if [ $exitstatus = 0 ]; then
+		$REPOS
+	else
+		main
+	fi
+}
+

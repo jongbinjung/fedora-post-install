@@ -2,19 +2,19 @@
 
 dir="$(dirname "$0")"
 
-DEVTOOLS="$dir/data/development.list"
+FAVS="$dir/data/favs.list"
 
-# Install preferred development applications using the list of packages 'data/development.list'
-function development {
+# Install preferred applications using the list of packages 'data/favs.list'
+function favs {
 	if (eval `resize` && whiptail \
-		--title "Preferred Development Applications" \
-		--yesno "Current list of preferred development tools to install: \n\n$(cat $DEVTOOLS) \n\nProceed with installation?" \
+		--title "Preferred Applications" \
+		--yesno "Current list of preferred applications to install: \n\n$(cat $FAVS) \n\nProceed with installation?" \
 		$LINES $COLUMNS $(( $LINES - 12 )) \
 		--scrolltext) then
 		show_info 'Installing...'
 		show_warning 'Requires root privileges'
 		# For loop for installing
-		for PACKAGE in $(cat $DEVTOOLS)
+		for PACKAGE in $(cat $FAVS)
 		do
 			# Check if package is installed
 			PKGCHECK=$(dnf list installed | grep "$PACKAGE")
@@ -28,7 +28,7 @@ function development {
 			fi
 		done
 		show_success 'Done.'
-		whiptail --title "Finished" --msgbox "Installation of your preferred development tools is complete." 8 78
+		whiptail --title "Finished" --msgbox "Installation of your preferred applications is complete." 8 78
 		main
 	else
 		main

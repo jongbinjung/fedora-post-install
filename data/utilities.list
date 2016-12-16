@@ -1,11 +1,7 @@
 dconf-editor
 firewall-config
-gpg
-java
-mediainfo
+powertop
 nano
 openssh-server
-openvpn
-easy-rsa
 symlinks
-wget
+tlp

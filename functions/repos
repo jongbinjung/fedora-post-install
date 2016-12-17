@@ -2,11 +2,11 @@
 
 # Install RPM Fusion
 function rpmfusion {
-eval `resize` 
+eval `resize`
 exitstatus=$?
 if [ $exitstatus = 0 ]; then
 	status="0"
-	while [ "$status" -eq 0 ]  
+	while [ "$status" -eq 0 ]
 	do
 		VERSION=$(whiptail \
 		--title "RPM Fusion" --radiolist \
@@ -16,10 +16,10 @@ if [ $exitstatus = 0 ]; then
 		$LINES $COLUMNS $(( $LINES - 12 )) \
 		"free"		"RPM Fusion (Free)" ON \
 		"nonfree"	"RPM Fusion (Non-free)" OFF \
-		3>&1 1>&2 2>&3) 
+		3>&1 1>&2 2>&3)
 		# Change to lower case and remove spaces.
 		case "${VERSION}" in
-		free) 
+		free)
 			# Check
 			if [ -e /etc/yum.repos.d/rpmfusion-free.repo ]; then
 				echo 'RPM Fusion (Free) is already in the repositories.'
@@ -40,7 +40,7 @@ if [ $exitstatus = 0 ]; then
 				rpmfusion
 			fi
 		;;
-		nonfree) 
+		nonfree)
 			# Check
 			if [ -e /etc/yum.repos.d/rpmfusion-nonfree.repo ]; then
 				echo 'RPM Fusion (Non-free) is already in the repositories.'
@@ -61,7 +61,7 @@ if [ $exitstatus = 0 ]; then
 				rpmfusion
 			fi
 		;;
-		*)status=1 
+		*)status=1
 			repositories
 		;;
 		esac
@@ -71,6 +71,28 @@ else
 	repositories
 fi
 }
+
+# Install gtk themes
+function gtk-themes {
+  # Add copr
+if [ -e /etc/yum.repos.d/_copr_heikoada-gtk-themes.repo ]; then
+  echo 'gtk-themes copr enabled'
+  whiptail --title "Finished" --msgbox "gtk-themes copr is already enabled." 8 78
+else
+  # Add repository
+  echo 'Adding gtk-themes copr to repositories...'
+  show_info 'Requires root privileges:'
+  sudo dnf copr enable heikoada/gtk-themes
+  show_success 'Done.'
+  # Update system
+  echo 'Performing system update...'
+  sudo dnf -y update
+  echo 'Done'
+  whiptail --title "Finished" --msgbox "gtk-themes copr has been added." 8 78
+fi
+repositories
+}
+
 
 # Install Third-Party Repositories
 function repositories {
@@ -83,8 +105,9 @@ function repositories {
 		--cancel-button "Go Back" \
 		$LINES $COLUMNS $(( $LINES - 12 )) \
 		'rpmfusion'		 'RPM Fusion' \
+		'gtk-themes'		 'Flat themes' \
 		3>&1 1>&2 2>&3)
-	 
+
 	exitstatus=$?
 	if [ $exitstatus = 0 ]; then
 		$REPOS

@@ -3,6 +3,7 @@
 dir="$(dirname "$0")"
 
 GSETTINGS="$dir/data/gsettings.list"
+XSETTINGS="$dir/data/xsettings.list"
 
 # Automatically set preferred gsettings keys as outlined in the 'gsettings.list' file
 function preferences {
@@ -17,10 +18,24 @@ function preferences {
 	configure
 }
 
+# Automatically set preferred gsettings keys as outlined in the 'gsettings.list' file
+function xdg {
+	show_info 'Setting preferred xdg-mime defaults...'
+	while IFS= read line
+	do
+		xdg-mime default $line
+	done < "$XSETTINGS"
+	# Done
+	show_success 'Done.'
+	whiptail --title "Finished" --msgbox "Settings changed successfully." 8 78
+	configure
+}
+
+
 # Put SELinux in permissive mode
 function selinux {
 	show_info 'Configuring SELinux to ryn in permissive mode...'
-	show_warning 'Requires root privileges:'  
+	show_warning 'Requires root privileges:'
 	sudo sed --in-place 's/SELINUX=.*$/SELINUX=permissive/g' /etc/selinux/config
 	show_success 'Done.'
 	# Done
@@ -38,9 +53,10 @@ function configure {
 		--cancel-button "Go Back" \
 		$LINES $COLUMNS $(( $LINES - 12 )) \
 		preferences	 'Set preferred application-specific settings' \
+		xdg	 'Set preferred xdg-mime defaults' \
 		selinux		 'Put SELinux in permissive mode' \
 		3>&1 1>&2 2>&3)
-	 
+
 	exitstatus=$?
 	if [ $exitstatus = 0 ]; then
 		$CONF

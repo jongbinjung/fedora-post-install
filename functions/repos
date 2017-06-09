@@ -94,6 +94,27 @@ repositories
 }
 
 
+# Install i3desktop tools
+function i3desktop {
+  # Add copr
+if [ -e /etc/yum.repos.d/_copr_heikoada-gtk-themes.repo ]; then
+  echo 'i3desktop copr enabled'
+  whiptail --title "Finished" --msgbox "i3desktop copr is already enabled." 8 78
+else
+  # Add repository
+  echo 'Adding i3desktop copr to repositories...'
+  show_info 'Requires root privileges:'
+  sudo dnf copr enable yaroslav/i3desktop
+  show_success 'Done.'
+  # Update system
+  echo 'Performing system update...'
+  sudo dnf -y update
+  echo 'Done'
+  whiptail --title "Finished" --msgbox "i3desktop copr has been added." 8 78
+fi
+repositories
+}
+
 # Install Third-Party Repositories
 function repositories {
 	eval `resize`
@@ -106,6 +127,7 @@ function repositories {
 		$LINES $COLUMNS $(( $LINES - 12 )) \
 		'rpmfusion'		 'RPM Fusion' \
 		'gtk-themes'		 'Flat themes' \
+    'i3desktop'		 'i3 Tools (rofi)' \
 		3>&1 1>&2 2>&3)
 
 	exitstatus=$?
